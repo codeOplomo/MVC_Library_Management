@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\BookController;
+namespace App\Controllers\BookControllers;
 require __DIR__ . '/../../../vendor/autoload.php';
 
 use PDOException;
@@ -110,43 +110,43 @@ public function deleteById($id)
 
 
 
-if (isset($_POST['submit'])) {
-    $book = new Book(null,null,null,null,null,null,null);
-    $book->setTitle($_POST['title']);
-    $book->setAuthor($_POST['author']);
-    $book->setGenre($_POST['genre']);
-    $book->setDescription($_POST['description']);
-    $book->setPublicationYear($_POST['publication_year']);
-    $book->setTotalCopies($_POST['total_copies']);
-    $book->setAvailableCopies($_POST['available_copies']);
-    $bookimp = new BookController();
-    $bookimp->save($book);
-}
+// if (isset($_POST['submit'])) {
+//     $book = new Book(null,null,null,null,null,null,null);
+//     $book->setTitle($_POST['title']);
+//     $book->setAuthor($_POST['author']);
+//     $book->setGenre($_POST['genre']);
+//     $book->setDescription($_POST['description']);
+//     $book->setPublicationYear($_POST['publication_year']);
+//     $book->setTotalCopies($_POST['total_copies']);
+//     $book->setAvailableCopies($_POST['available_copies']);
+//     $bookimp = new BookController();
+//     $bookimp->save($book);
+// }
 
 
-if(isset($_POST['submit-edit'])) {
-    $book = new Book(null,null,null,null,null,null,null,null);
-    $book->setId($_POST["id"]);
-    $book->setTitle($_POST['title']);
-    $book->setAuthor($_POST['author']);
-    $book->setGenre($_POST['genre']);
-    $book->setDescription($_POST['description']);
-    $book->setPublicationYear($_POST['publication_year']);
-    $book->setTotalCopies($_POST['total_copies']);
-    $book->setAvailableCopies($_POST['available_copies']);
-    $bookimp = new BookController();
+// if(isset($_POST['submit-edit'])) {
+//     $book = new Book(null,null,null,null,null,null,null,null);
+//     $book->setId($_POST["id"]);
+//     $book->setTitle($_POST['title']);
+//     $book->setAuthor($_POST['author']);
+//     $book->setGenre($_POST['genre']);
+//     $book->setDescription($_POST['description']);
+//     $book->setPublicationYear($_POST['publication_year']);
+//     $book->setTotalCopies($_POST['total_copies']);
+//     $book->setAvailableCopies($_POST['available_copies']);
+//     $bookimp = new BookController();
 
-    try {
-        $bookimp->modify($book);
-        $path = "../../../Views/User/books.php";
-        header("Location: " . $path);
-        exit;
-    }
+//     try {
+//         $bookimp->modify($book);
+//         $path = "../../../Views/User/books.php";
+//         header("Location: " . $path);
+//         exit;
+//     }
 
-    catch (PDOException $e) {
-        echo "Error updating book: " . $e->getMessage();
+//     catch (PDOException $e) {
+//         echo "Error updating book: " . $e->getMessage();
 
-    } catch (Exception $e) {
-        echo "Error: " . $e->getMessage();
-    }
-}
+//     } catch (Exception $e) {
+//         echo "Error: " . $e->getMessage();
+//     }
+// }

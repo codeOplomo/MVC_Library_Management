@@ -10,9 +10,9 @@ $dotenv->load();
 
 class DatabaseConnection
 {
-    protected $connection;
-    protected static $instance = null;
-    public function __construct() {
+    private $connection;
+    private static $instance = null;
+    private function __construct() {
         $dsn = "mysql:host={$_ENV["DB_HOST"]};dbname={$_ENV["DB_DATABASE"]}";
 
         try {
@@ -27,7 +27,7 @@ class DatabaseConnection
     {
         if (!self::$instance) {
             try {
-                self::$instance = new DatabaseConnection();
+                self::$instance = new self();
             } catch (Exception $e) {
                 throw $e;
             }
@@ -39,13 +39,4 @@ class DatabaseConnection
         return $this->connection;
     }
 
-
-
-    // public function closeConnection() {
-    //     if ($this->connection !== null) {
-    //         $this->connection->close();
-    //         $this->connection = null;
-    //         self::$instance = null;
-    //     }
-    // }
 }

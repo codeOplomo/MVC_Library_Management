@@ -12,6 +12,12 @@ CREATE TABLE book (
     availiable_copies INT
 );
 
+ALTER TABLE book ADD COLUMN image_link VARCHAR(255);
+
+UPDATE book SET image_link = 'path/to/your/image1.jpg' WHERE id = 1;
+UPDATE book SET image_link = 'path/to/your/image2.jpg' WHERE id = 2;
+
+
 CREATE TABLE role (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50)

@@ -13,7 +13,7 @@ trait CrudEntity
     protected $pdo;
 
     public function __construct(){
-        $this->pdo = new DatabaseConnection();
+        $this->pdo = DatabaseConnection::getInstance()->getConnection();
     }
 
     // Set up a PDO connection (you may need to adjust these parameters)
