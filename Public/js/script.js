@@ -1,43 +1,206 @@
-const mobileMenuButton = document.querySelector('.mobile-menu-button');
-const mobileMenu = document.querySelector('.mobile-menu');
+
+const SELECTORS = {
+    MOBILE_MENU_BUTTON: '.mobile-menu-button',
+    MOBILE_MENU: '.mobile-menu',
+    CART_COUNT: '#cartCount',
+    CART_SECTION: '#cartSection',
+    MAKE_RESERVATION_BTN: '#makeReservationBtn',
+    CLEAR_ALL_BTN: '#clearAllBtn',
+};
+
+const reservedBooksKey = 'reservedBooks';
+
+const mobileMenuButton = document.querySelector(SELECTORS.MOBILE_MENU_BUTTON);
+const mobileMenu = document.querySelector(SELECTORS.MOBILE_MENU);
+const cartCountElement = document.querySelector(SELECTORS.CART_COUNT);
+const cartSection = document.querySelector(SELECTORS.CART_SECTION);
+const makeReservationBtn = document.querySelector(SELECTORS.MAKE_RESERVATION_BTN);
+const clearAllBtn = document.querySelector(SELECTORS.CLEAR_ALL_BTN);
 
 mobileMenuButton.addEventListener('click', () => {
     mobileMenu.classList.toggle('hidden');
 });
 
-function reserveBook(bookId) {
-    // Increment the cart count
-    var cartCountElement = document.getElementById('cartCount');
-    var currentCount = parseInt(cartCountElement.textContent);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeCartCount();
+    setupEventListeners();
+    updateCartSection();
+});
+
+function setupEventListeners() {
+    cartSection.addEventListener('change', handleQuantityChange);
+    makeReservationBtn.addEventListener('click', makeReservation);
+    clearAllBtn.addEventListener('click', clearAllReservedBooks);
+}
+
+function initializeCartCount() {
+    const reservedBooks = getReservedBooks();
+    updateCartCount(reservedBooks.length);
+}
+
+function clearAllReservedBooks() {
+    clearReservedBooks();
+    updateCartCount(0);
+    updateCartSection();
+}
+
+function handleQuantityChange(event) {
+    if (event.target.id === 'quantitySelect') {
+        const title = event.target.dataset.title;
+        const newQuantity = parseInt(event.target.value);
+        updateReservedBooksQuantity(title, newQuantity);
+        updateCartSection();
+    }
+}
+
+function makeReservation() {
+    const reservedBooks = getReservedBooks();
+
+    if (reservedBooks.length > 0) {
+        sendReservationToServer(reservedBooks)
+            .then(() => {
+                alert('Reservation successful!');
+                clearReservedBooks();
+                updateCartSection();
+            })
+            .catch(() => {
+                alert('Reservation failed. Please try again.');
+            });
+    } else {
+        alert('No books are reserved.');
+    }
+}
+
+function sendReservationToServer(reservedBooks) {
+    return fetch('../../app/Controllers/ReservationController/ReservationController.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reservedBooks),
+    });
+}
+
+function reserveBook(book) {
+    const currentCount = parseInt(cartCountElement.textContent);
     cartCountElement.textContent = currentCount + 1;
 
-    // Store the reserved book in the session (you can modify this logic based on your needs)
-    var reservedBooks = JSON.parse(sessionStorage.getItem('reservedBooks')) || [];
-    reservedBooks.push({ id: bookId, title: bookTitle });
-    sessionStorage.setItem('reservedBooks', JSON.stringify(reservedBooks));
+    const reservedBooks = getReservedBooks();
+    book.quantity = 1;
+    reservedBooks.push(book);
+    updateReservedBooksInStorage(reservedBooks);
 
-    // Optionally, you can show a confirmation message
+    updateCartCount(currentCount + 1);
+    updateCartSection();
     alert('Book reserved successfully!');
 }
 
-async function updateCartCount() {
-    try {
-        const response = await fetch('path_to_cart_count_endpoint'); // Replace with the actual endpoint to fetch the count
-        const countResult = await response.json();
+function updateCartSection() {
+    const reservedBooks = getReservedBooks();
+    updateCartCount(reservedBooks.length);
 
-        if (countResult.status) {
-            // Update the cart count in the UI
-            const cartCountElement = document.getElementById('cartCount');
-            cartCountElement.textContent = countResult.count; // Assuming your response has a count property
-        } else {
-            console.error('Error fetching cart count:', countResult.message);
-        }
-    } catch (error) {
-        console.error('Error fetching cart count:', error);
+    const groupedBooks = groupBooksByTitle(reservedBooks);
+
+    cartSection.innerHTML = '';
+
+    Object.keys(groupedBooks).forEach(title => {
+        const bookDiv = createBookDiv(title, groupedBooks[title]);
+        cartSection.appendChild(bookDiv);
+    });
+}
+
+function createBookDiv(title, quantity) {
+    const bookDiv = document.createElement('div');
+    bookDiv.classList.add('col-md-4', 'mb-4');
+
+    const card = document.createElement('div');
+    card.classList.add('card', 'h-100');
+
+    const cardBody = document.createElement('div');
+    cardBody.classList.add('card-body');
+
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.classList.add('btn-close');
+    closeButton.setAttribute('aria-label', 'Remove');
+    closeButton.addEventListener('click', () => removeReservedBook(title));
+
+    const cardTitle = document.createElement('h5');
+    cardTitle.classList.add('card-title');
+    cardTitle.textContent = title;
+
+    const cardText = document.createElement('p');
+    cardText.classList.add('card-text');
+    cardText.textContent = `Quantity: ${quantity}`;
+
+    cardBody.appendChild(closeButton);
+    cardBody.appendChild(cardTitle);
+    cardBody.appendChild(cardText);
+    card.appendChild(cardBody);
+    bookDiv.appendChild(card);
+
+    return bookDiv;
+}
+
+function groupBooksByTitle(books) {
+    return books.reduce((acc, book) => {
+        acc[book.title] = (acc[book.title] || 0) + 1;
+        return acc;
+    }, {});
+}
+
+function getReservedBooks() {
+    return JSON.parse(sessionStorage.getItem(reservedBooksKey)) || [];
+}
+
+function updateReservedBooksInStorage(reservedBooks) {
+    sessionStorage.setItem(reservedBooksKey, JSON.stringify(reservedBooks));
+}
+
+function clearReservedBooks() {
+    sessionStorage.removeItem(reservedBooksKey);
+}
+
+function updateCartCount(count) {
+    cartCountElement.textContent = count;
+}
+
+function removeReservedBook(title) {
+    var reservedBooks = getReservedBooks();
+    var removedBookIndex = reservedBooks.findIndex(book => book.title === title);
+
+    if (removedBookIndex !== -1) {
+        var removedQuantity = reservedBooks[removedBookIndex].quantity || 0;
+        updateCartCount(-removedQuantity);
+
+        reservedBooks.splice(removedBookIndex, 1);
+
+        updateReservedBooksInStorage(reservedBooks);
+        updateCartSection();
     }
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
-});
+
+
+// async function updateCartCount() {
+//     try {
+//         const response = await fetch('path_to_cart_count_endpoint'); // Replace with the actual endpoint to fetch the count
+//         const countResult = await response.json();
+
+//         if (countResult.status) {
+//             // Update the cart count in the UI
+//             const cartCountElement = document.getElementById('cartCount');
+//             cartCountElement.textContent = countResult.count; // Assuming your response has a count property
+//         } else {
+//             console.error('Error fetching cart count:', countResult.message);
+//         }
+//     } catch (error) {
+//         console.error('Error fetching cart count:', error);
+//     }
+// }
+
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     updateCartCount();
+// });

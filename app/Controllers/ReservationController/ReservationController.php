@@ -7,9 +7,11 @@ use PDOException;
 use Exception;
 
 use App\Models\EntityImplementation\CrudEntity;
+use App\Models\Entity\User;
 class ReservationController
 {
     use CrudEntity;
+    use User;
 
 
     public function reserveBook($bookId)

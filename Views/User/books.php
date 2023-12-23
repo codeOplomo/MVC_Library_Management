@@ -48,12 +48,45 @@ $books = $bookController->findAll();
                     <li class="nav-item"><a class="nav-link" href="#">About</a></li>
                 </ul>
                 <form class="d-flex">
-                    <button class="btn btn-outline-dark" type="submit">
+                    <button class="btn btn-outline-dark" type="button" data-bs-toggle="modal"
+                        data-bs-target="#cartModal">
                         <i class="bi-cart-fill me-1"></i>
                         Cart
-                        <span class="badge bg-dark text-white ms-1 rounded-pill" id="cartCount">0</span>
+                        <span class="badge bg-dark text-white ms-1 rounded-pill" id="cartCount">
+                            <?php
+                            // Retrieve existing reserved books from session storage
+                            $reservedBooks = json_decode($_SESSION['reservedBooks'] ?? '[]', true);
+                            // Output the count of reserved books or 0 if not set
+                            echo count($reservedBooks);
+                            ?>
+                        </span>
                     </button>
                 </form>
+
+                <!-- Modal HTML -->
+                <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="cartModalLabel">Reserved Books</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="cartSection" class="row">
+                                    <!-- Reserved books will be dynamically added here -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-danger" id="clearAllBtn" onclick="clearAllReservedBooks()">Clear All</button>
+                                <button type="button" class="btn btn-primary" id="makeReservationBtn" onclick="makeReservation()">Make a Reservation</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </nav>
@@ -89,11 +122,12 @@ $books = $bookController->findAll();
 
                                 <button type="hidden" class="btn btn-primary disabled">Reserve it</button>
                             <?php } else { ?>
+                                <button onclick="reserveBook(<?php echo htmlspecialchars(json_encode($book)); ?>)"
+                                    class="btn btn-primary">Reserve it</button>
 
-                                <button onclick="reserveBook(<?php echo htmlspecialchars($book['id']); ?>)" class="btn btn-primary">Reserve it</button>
                             <?php } ?>
-                         
-                           
+
+
                         </div>
                     </div>
                 </div>

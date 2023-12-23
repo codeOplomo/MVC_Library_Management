@@ -1,9 +1,9 @@
 <?php
 namespace App;
 require __DIR__ . '/../../vendor/autoload.php';
-use App\EntityImplementation\BaseEntity;
-use App\EntityImplementation\CrudEntity;
-use App\Models\Book;
+use App\Models\EntityImplementation\BaseEntity;
+use App\Models\EntityImplementation\CrudEntity;
+use App\Models\Entity\Book;
 
 use Exception;
 class User{
