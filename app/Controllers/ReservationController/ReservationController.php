@@ -31,10 +31,12 @@ class ReservationController
                 'isReturned' => $book['quantity'], // Assuming 'quantity' is part of the book data
             ];
 
+            error_log('Reservation Data: ' . print_r($reservationData, true));
+
             $insertedId = $this->save($reservationData);
 
             if ($insertedId) {
-                echo 'reservation sucseed!!!!!';
+                echo 'reservation sucseed!!!!06!';
             } else {
                 // Handle failed reservation
             }

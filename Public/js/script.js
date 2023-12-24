@@ -1,6 +1,5 @@
 
 const SELECTORS = {
-    // MOBILE_MENU_BUTTON: '.mobile-menu-button',
     MOBILE_MENU: '.mobile-menu',
     CART_COUNT: '#cartCount',
     CART_SECTION: '#cartSection',
@@ -10,16 +9,12 @@ const SELECTORS = {
 
 const reservedBooksKey = 'reservedBooks';
 
-// const mobileMenuButton = document.querySelector(SELECTORS.MOBILE_MENU_BUTTON);
 const mobileMenu = document.querySelector(SELECTORS.MOBILE_MENU);
 const cartCountElement = document.querySelector(SELECTORS.CART_COUNT);
 const cartSection = document.querySelector(SELECTORS.CART_SECTION);
 const makeReservationBtn = document.querySelector(SELECTORS.MAKE_RESERVATION_BTN);
 const clearAllBtn = document.querySelector(SELECTORS.CLEAR_ALL_BTN);
 
-// mobileMenuButton.addEventListener('click', () => {
-//     mobileMenu.classList.toggle('hidden');
-// });
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeCartCount();
@@ -69,12 +64,12 @@ function makeReservation() {
 
     if (reservedBooks.length > 0) {
         sendReservationToServer(reservedBooks, returnDate)
-            .then(() => {
+        .then(response => {
                 if (response.status) {
                     alert('Reservation successful!');
                     clearReservedBooks();
                     updateCartSection();
-                    window.location.href = '/Gestion_Biblioth%C3%A8que/app/Controllers/ReservationController/ReservationController.php';
+                    window.location.href = '/Gestion_Bibliotheque/Views/User/books.php';
                 } else {
                     alert('Reservation failed. Please try again.');
                 }
@@ -89,7 +84,7 @@ function makeReservation() {
 }
 
 function sendReservationToServer(reservedBooks, returnDate) {
-    return fetch('/Gestion_Biblioth%C3%A8que/app/Controllers/ReservationController/ReservationController.php', {
+    return fetch('/Gestion_Bibliotheque/app/Controllers/ReservationController/ReservationController.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -199,25 +194,3 @@ function removeReservedBook(title) {
 
 
 
-
-// async function updateCartCount() {
-//     try {
-//         const response = await fetch('path_to_cart_count_endpoint'); // Replace with the actual endpoint to fetch the count
-//         const countResult = await response.json();
-
-//         if (countResult.status) {
-//             // Update the cart count in the UI
-//             const cartCountElement = document.getElementById('cartCount');
-//             cartCountElement.textContent = countResult.count; // Assuming your response has a count property
-//         } else {
-//             console.error('Error fetching cart count:', countResult.message);
-//         }
-//     } catch (error) {
-//         console.error('Error fetching cart count:', error);
-//     }
-// }
-
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     updateCartCount();
-// });
