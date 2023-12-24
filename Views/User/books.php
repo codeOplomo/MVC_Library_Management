@@ -1,6 +1,7 @@
 <?php
 require_once '../../vendor/autoload.php';
 
+
 // use App\Config\DbConnection;
 use App\Controllers\BookControllers\BookController;
 use App\Models\Entity\Book;
@@ -19,6 +20,17 @@ $books = $bookController->findAll();
 
 <!DOCTYPE html>
 <html lang="en">
+<!-- Bootstrap Datepicker CSS -->
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+
+<!-- Bootstrap JS and Popper.js (if not already included) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Bootstrap Datepicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
 
 <head>
     <meta charset="UTF-8">
@@ -77,11 +89,16 @@ $books = $bookController->findAll();
                                 <div id="cartSection" class="row">
                                     <!-- Reserved books will be dynamically added here -->
                                 </div>
+                                <div class="mb-3">
+                                    <label for="returnDate">Return Date:</label>
+                                    <input type="date" class="form-control" id="returnDate">
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-danger" id="clearAllBtn" onclick="clearAllReservedBooks()">Clear All</button>
-                                <button type="button" class="btn btn-primary" id="makeReservationBtn" onclick="makeReservation()">Make a Reservation</button>
+                                <button type="button" class="btn btn-danger" id="clearAllBtn"
+                                    onclick="clearAllReservedBooks()">Clear All</button>
+                                <button type="button" class="btn btn-primary" id="makeReservationBtn">Make a Reservation</button>
                             </div>
                         </div>
                     </div>

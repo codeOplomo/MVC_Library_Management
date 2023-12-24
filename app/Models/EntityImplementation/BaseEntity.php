@@ -2,7 +2,7 @@
 namespace App\Models\EntityImplementation;
 require __DIR__ . '/../../../vendor/autoload.php';
 
-use App\Models\Entity\Book;
+// use App\Models\Entity\Book;
 
 use Exception;
 trait BaseEntity {

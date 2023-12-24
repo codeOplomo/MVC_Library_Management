@@ -1,6 +1,6 @@
 
 const SELECTORS = {
-    MOBILE_MENU_BUTTON: '.mobile-menu-button',
+    // MOBILE_MENU_BUTTON: '.mobile-menu-button',
     MOBILE_MENU: '.mobile-menu',
     CART_COUNT: '#cartCount',
     CART_SECTION: '#cartSection',
@@ -10,21 +10,22 @@ const SELECTORS = {
 
 const reservedBooksKey = 'reservedBooks';
 
-const mobileMenuButton = document.querySelector(SELECTORS.MOBILE_MENU_BUTTON);
+// const mobileMenuButton = document.querySelector(SELECTORS.MOBILE_MENU_BUTTON);
 const mobileMenu = document.querySelector(SELECTORS.MOBILE_MENU);
 const cartCountElement = document.querySelector(SELECTORS.CART_COUNT);
 const cartSection = document.querySelector(SELECTORS.CART_SECTION);
 const makeReservationBtn = document.querySelector(SELECTORS.MAKE_RESERVATION_BTN);
 const clearAllBtn = document.querySelector(SELECTORS.CLEAR_ALL_BTN);
 
-mobileMenuButton.addEventListener('click', () => {
-    mobileMenu.classList.toggle('hidden');
-});
+// mobileMenuButton.addEventListener('click', () => {
+//     mobileMenu.classList.toggle('hidden');
+// });
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeCartCount();
     setupEventListeners();
     updateCartSection();
+
 });
 
 function setupEventListeners() {
@@ -53,15 +54,31 @@ function handleQuantityChange(event) {
     }
 }
 
+function getReturnDate() {
+    return document.getElementById('returnDate').value;
+}
+
 function makeReservation() {
     const reservedBooks = getReservedBooks();
+    const returnDate = getReturnDate();
+
+    if (!returnDate) {
+        alert('Please select a return date.');
+        return;
+    }
 
     if (reservedBooks.length > 0) {
-        sendReservationToServer(reservedBooks)
+        sendReservationToServer(reservedBooks, returnDate)
             .then(() => {
-                alert('Reservation successful!');
-                clearReservedBooks();
-                updateCartSection();
+                if (response.status) {
+                    alert('Reservation successful!');
+                    clearReservedBooks();
+                    updateCartSection();
+                    window.location.href = '/Gestion_Biblioth%C3%A8que/app/Controllers/ReservationController/ReservationController.php';
+                } else {
+                    alert('Reservation failed. Please try again.');
+                }
+
             })
             .catch(() => {
                 alert('Reservation failed. Please try again.');
@@ -71,13 +88,13 @@ function makeReservation() {
     }
 }
 
-function sendReservationToServer(reservedBooks) {
-    return fetch('../../app/Controllers/ReservationController/ReservationController.php', {
+function sendReservationToServer(reservedBooks, returnDate) {
+    return fetch('/Gestion_Biblioth%C3%A8que/app/Controllers/ReservationController/ReservationController.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(reservedBooks),
+        body: JSON.stringify({ reservedBooks, returnDate }),
     });
 }
 

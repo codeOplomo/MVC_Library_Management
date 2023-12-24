@@ -3,8 +3,8 @@
 namespace App\Models;
 use \Exception;
 require __DIR__ . '/../../vendor/autoload.php';
-use App\EntityImplementation\BaseEntity;
-use App\EntityImplementation\CrudEntity;
+use App\Models\EntityImplementation\BaseEntity;
+use App\Models\EntityImplementation\CrudEntity;
 
 
 class Book {

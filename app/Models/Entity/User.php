@@ -16,7 +16,7 @@ class User{
     private $email;
     private $password;
     private $phone;
-    private $budget;
+    // private $budget;
 
     private $reservedBooks = [];
     
@@ -39,6 +39,56 @@ class User{
     public function getReservedBooks() {
         return $this->reservedBooks;
     }
+
+    // Getters and setters
+
+    public function getFirstname() {
+        return $this->firstname;
+    }
+
+    public function setFirstname($firstname) {
+        $this->firstname = $firstname;
+    }
+
+    public function getLastname() {
+        return $this->lastname;
+    }
+
+    public function setLastname($lastname) {
+        $this->lastname = $lastname;
+    }
+
+    public function getEmail() {
+        return $this->email;
+    }
+
+    public function setEmail($email) {
+        $this->email = $email;
+    }
+
+    public function getPassword() {
+        return $this->password;
+    }
+
+    public function setPassword($password) {
+        $this->password = $password;
+    }
+
+    public function getPhone() {
+        return $this->phone;
+    }
+
+    public function setPhone($phone) {
+        $this->phone = $phone;
+    }
+
+    // public function getBudget() {
+    //     return $this->budget;
+    // }
+
+    // public function setBudget($budget) {
+    //     $this->budget = $budget;
+    // }
 
    /* public function borrowBook(Book $book): array {
          try {
@@ -74,10 +124,10 @@ class User{
     } */
 
 
-    private function validateReturn(Book $book) {
-        // Check if the user has borrowed the book
-        if (!in_array($book, $this->borrowedBooks)) {
-            throw new Exception("You have not borrowed this book.");
-        }
-    }
+//     private function validateReturn(Book $book) {
+//         // Check if the user has borrowed the book
+//         if (!in_array($book, $this->borrowedBooks)) {
+//             throw new Exception("You have not borrowed this book.");
+//         }
+//     }
 }

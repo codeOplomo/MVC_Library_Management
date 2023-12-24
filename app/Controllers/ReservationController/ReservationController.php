@@ -11,56 +11,90 @@ use App\Models\Entity\User;
 class ReservationController
 {
     use CrudEntity;
-    use User;
+    // use User;
 
-
-    public function reserveBook($bookId)
-    {
-        try {
-            $book = $this->findById($bookId);
-
-            if ($book->checkAvailability()) {
-                $member = $this->getCurrentMember();
-
-                $reservationData = [
-                    'book_id' => $bookId,
-                    'member_id' => $member->getId(),
-                ];
-
-                $insertedId = $this->save($reservationData);
-
-                $book->decreaseAvailableCopies();
-                $this->modify(['available_copies' => $book->getAvailableCopies()], $bookId);
-
-                // Save reservation and book changes to the database
-
-                return ['status' => true, 'message' => 'Book reserved successfully.'];
-            } else {
-                return ['status' => false, 'message' => 'Book is not available for reservation.'];
-            }
-        } catch (Exception $e) {
-            return ['status' => false, 'message' => $e->getMessage()];
-        }
-    }
-
-    private function getCurrentMember()
-    {
+    public function processReservation($reservedBooks, $returnDate)
+{
+    try {
         session_start();
+        
+        // Assuming you have a User class or similar to represent the logged-in user
+        $userId = $_SESSION['user_id'];
 
-        if (isset($_SESSION['role']) && $_SESSION['role'] === 'Member' && isset($_SESSION['user_id'])) {
-            $user_id = $_SESSION['user_id'];
+        foreach ($reservedBooks as $book) {
+            $reservationData = [
+                'userId' => $userId,
+                'bookId' => $book['id'], // Assuming you have an 'id' field for books
+                'description' => $book['description'], // Adjust accordingly
+                'reservationDate' => date('Y-m-d'), // Assuming you want to store the current date
+                'returnDate' => $returnDate,
+                'isReturned' => $book['quantity'], // Assuming 'quantity' is part of the book data
+            ];
 
-            $userData = $this->read($user_id);
+            $insertedId = $this->save($reservationData);
 
-            // You might have a User class or similar to represent the logged-in user
-            // Adjust this part based on your actual User class or structure
-            $member = new User($userData['user_id'], $userData['username'], 'Member');
-            return $member;
-        } else {
-            // If not authenticated or not a member, throw an exception or return null
-            throw new Exception('User is not authenticated as a Member.');
+            if ($insertedId) {
+                echo 'reservation sucseed!!!!!';
+            } else {
+                // Handle failed reservation
+            }
         }
+
+        return ['status' => true, 'message' => 'Reservation successful.'];
+
+    } catch (Exception $e) {
+        return ['status' => false, 'message' => 'Failed to process reservation.'];
     }
+}
+
+
+
+    // public function reserveBook($bookId, $returnDate)
+    // {
+    //     try {
+    //         $book = $this->findById($bookId);
+
+    //         if ($book->checkAvailability()) {
+    //             $member = $this->getCurrentMember();
+
+    //             $reservationData = [
+    //                 'book_id' => $bookId,
+    //                 'member_id' => $member->getId(),
+    //                 'return_date' => $returnDate,
+    //             ];
+
+    //             $insertedId = $this->save($reservationData);
+
+    //             $book->decreaseAvailableCopies();
+    //             $this->modify(['available_copies' => $book->getAvailableCopies()], $bookId);
+
+    //             return ['status' => true, 'message' => 'Book reserved successfully.'];
+    //         } else {
+    //             return ['status' => false, 'message' => 'Book is not available for reservation.'];
+    //         }
+    //     } catch (Exception $e) {
+    //         return ['status' => false, 'message' => $e->getMessage()];
+    //     }
+    // }
+
+    // private function getCurrentMember()
+    // {
+    //     session_start();
+
+    //     if (isset($_SESSION['role']) && $_SESSION['role'] === 'Member' && isset($_SESSION['user_id'])) {
+    //         $user_id = $_SESSION['user_id'];
+
+    //         $userData = $this->read($user_id);
+
+    //         // You might have a User class or similar to represent the logged-in user
+    //         // Adjust this part based on your actual User class or structure
+    //         $member = new User($userData['user_id'], $userData['username'], 'Member');
+    //         return $member;
+    //     } else {
+    //         // If not authenticated or not a member, throw an exception or return null
+    //         throw new Exception('User is not authenticated as a Member.');
+    //     }
+    // }
 
     public function save($reservationData)
     {
@@ -121,6 +155,35 @@ class ReservationController
 }
 
 
+// Handle the reservation request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SESSION['role'] === 'Member' && isset($_SESSION['user_id'])) {
+    try {
+        echo 'reservation sucseed!!!!!';
+        // Get the JSON data from the request body
+        $requestData = json_decode(file_get_contents('php://input'), true);
+
+        // Validate and process the data
+        if (isset($requestData['reservedBooks']) && isset($requestData['returnDate'])) {
+            $reservedBooks = $requestData['reservedBooks'];
+            $returnDate = $requestData['returnDate'];
+
+            // Process the reservation and return a response
+            $response = $reservationController->processReservation($reservedBooks, $returnDate);
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+        } else {
+            header('HTTP/1.1 400 Bad Request');
+            echo json_encode(['error' => 'Invalid request data']);
+            exit;
+        }
+    } catch (Exception $e) {
+        header('HTTP/1.1 500 Internal Server Error');
+        echo json_encode(['error' => $e->getMessage()]);
+        exit;
+    }
+}
 
 // if(isset($_POST["edit-submit"])){
 //     $reservation = new Reservation(null,null,null,null,null,null);
