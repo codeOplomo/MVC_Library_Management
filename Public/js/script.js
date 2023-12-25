@@ -63,7 +63,13 @@ function makeReservation() {
     }
 
     if (reservedBooks.length > 0) {
-        sendReservationToServer(reservedBooks, returnDate)
+        const groupedBooks = groupBooksByTitle(reservedBooks);
+        const booksWithQuantity = Object.entries(groupedBooks).map(([title, quantity]) => ({
+            bookId: reservedBooks.find(book => book.title === title).id, // Assuming each book has an 'id' property
+            description: title, // Assuming the title is used as a description
+            quantity: quantity
+        }));
+        sendReservationToServer(booksWithQuantity, returnDate)
         .then(response => {
                 if (response.status) {
                     alert('Reservation successful!');
@@ -83,13 +89,16 @@ function makeReservation() {
     }
 }
 
+
 function sendReservationToServer(reservedBooks, returnDate) {
+
+    const booksWithQuantity = reservedBooks.map(book => ({ ...book, quantity: book.quantity }));
     return fetch('/Gestion_Bibliotheque/app/Controllers/ReservationController/ReservationController.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ reservedBooks, returnDate }),
+        body: JSON.stringify({ reservedBooks: booksWithQuantity, returnDate }),
     });
 }
 

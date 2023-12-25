@@ -15,7 +15,6 @@ class Authentication {
     
 
     protected function getTableName(): string {
-        // Return a custom table name for Authentication
         return 'user';
     }
 
@@ -61,7 +60,7 @@ class Authentication {
         ];
 
         try {
-            $insertedId = $this->create($userData);
+            $insertedId = $this->create($userData, $this->getTableName());
             if ($insertedId) {
                 return ['status' => true, 'message' => 'Registration successful.', 'user_id' => $insertedId];
             }else{

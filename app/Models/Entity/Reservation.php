@@ -1,4 +1,5 @@
 <?php
+namespace App\Models\Entity;
 
 class Reservation {
     private $userId;
@@ -15,6 +16,23 @@ class Reservation {
         $this->setReservationDate();
         $this->setReturnDate($returnDate);
         $this->setIsReturned($isReturned);
+    }
+
+    public function toArray()
+    {
+        return [
+            'userId' => $this->userId,
+            'bookId' => $this->bookId,
+            'description' => $this->description,
+            'reservationDate' => $this->reservationDate,
+            'returnDate' => $this->returnDate,
+            'isReturned' => $this->isReturned,
+        ];
+    }
+
+    protected function getTableName(): string
+    {
+        return 'reservation';
     }
 
     // Getters and setters

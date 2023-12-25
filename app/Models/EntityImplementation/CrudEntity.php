@@ -13,10 +13,10 @@ trait CrudEntity
     protected $pdo;
 
     public function __construct(){
-        $this->pdo = DatabaseConnection::getInstance()->getConnection();
+        // $this->pdo = DatabaseConnection::getInstance()->getConnection();
+        $this->pdo = self::getConnection();
     }
 
-    // Set up a PDO connection (you may need to adjust these parameters)
     protected static function getConnection()
     {
         try {
@@ -26,40 +26,40 @@ trait CrudEntity
         }
     }
 
-    protected function getTableName(): string
+    abstract protected function getTableName(): string;
+
+
+    public function create(array $data, $tableName = null)
     {
-        return '';
+        try {
+            $pdo = self::getConnection();
+
+            // If $tableName is not provided, use getTableName method
+            $tableName = $tableName ?? $this->getTableName();
+
+            $columns = implode(', ', array_keys($data));
+            $values = implode(', ', array_fill(0, count($data), '?'));
+
+            $stmt = $pdo->prepare("INSERT INTO {$tableName} ($columns) VALUES ($values)");
+            $stmt->execute(array_values($data));
+
+            return $pdo->lastInsertId();
+        } catch (PDOException $e) {
+            throw new Exception("Error saving entity: " . $e->getMessage());
+        }
     }
 
-    public function create(array $data)
+    public function read($id, array $columns = ['*'], $tableName = null)
 {
     try {
         $pdo = self::getConnection();
 
-        // Build the query based on the data keys and values
-        $columns = implode(', ', array_keys($data));
-        $values = implode(', ', array_fill(0, count($data), '?'));
+        // If $tableName is not provided, use getTableName method
+        $tableName = $tableName ?? $this->getTableName();
 
-        $stmt = $pdo->prepare("INSERT INTO {$this->getTableName()} ($columns) VALUES ($values)");
-        $stmt->execute(array_values($data));
-
-        return $pdo->lastInsertId();
-
-    } catch (PDOException $e) {
-        throw new Exception("Error saving entity: " . $e->getMessage());
-    }
-}
-
-
-public function read($id, array $columns = ['*'])
-{
-    try {
-        $pdo = self::getConnection();
-
-        // Convert columns array to a comma-separated string
         $columnsString = implode(', ', $columns);
 
-        $stmt = $pdo->prepare("SELECT $columnsString FROM {$this->getTableName()} WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT $columnsString FROM {$tableName} WHERE id = ?");
         $stmt->execute([$id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -74,32 +74,38 @@ public function read($id, array $columns = ['*'])
     }
 }
 
-public function readAll()
-    {
-        try {
-            $pdo = self::getConnection();
 
-            $stmt = $pdo->prepare("SELECT * FROM {$this->getTableName()}");
-            $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            return $result;
-        } catch (PDOException $e) {
-            throw new Exception("Error reading all entities: " . $e->getMessage());
-        }
-    }
-
-
-    public function update(array $data, $id)
+public function readAll($tableName = null)
 {
     try {
         $pdo = self::getConnection();
+
+        $tableName = $tableName ?? $this->getTableName();
+
+        $stmt = $pdo->prepare("SELECT * FROM {$tableName}");
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $result;
+    } catch (PDOException $e) {
+        throw new Exception("Error reading all entities: " . $e->getMessage());
+    }
+}
+
+
+
+public function update(array $data, $id, $tableName = null)
+{
+    try {
+        $pdo = self::getConnection();
+
+        $tableName = $tableName ?? $this->getTableName();
 
         $setClause = implode(', ', array_map(function ($key) {
             return "$key = ?";
         }, array_keys($data)));
 
-        $stmt = $pdo->prepare("UPDATE {$this->getTableName()} SET $setClause WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE {$tableName} SET $setClause WHERE id = ?");
         
         $values = array_values($data);
         $values[] = $id;
@@ -112,35 +118,43 @@ public function readAll()
     }
 }
 
+
     
 
 
-    public function delete($field, $value)
-    {
-        try {
-            $pdo = self::getConnection();
+public function delete($field, $value, $tableName = null)
+{
+    try {
+        $pdo = self::getConnection();
 
-            $stmt = $pdo->prepare("DELETE FROM {$this->getTableName()} WHERE {$field} = ?");
-            $stmt->execute([$value]);
+        $tableName = $tableName ?? $this->getTableName();
 
-            echo "Entity deleted.\n";
-        } catch (PDOException $e) {
-            throw new Exception("Error deleting entity: " . $e->getMessage());
-        }
+        $stmt = $pdo->prepare("DELETE FROM {$tableName} WHERE {$field} = ?");
+        $stmt->execute([$value]);
+
+        echo "Entity deleted.\n";
+    } catch (PDOException $e) {
+        throw new Exception("Error deleting entity: " . $e->getMessage());
     }
+}
 
-    public function getEntityByField(string $field, $value) {
-        try {
-            $pdo = self::getConnection();
-            $stmt = $pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE $field = ?");
-            $stmt->execute([$value]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+public function getEntityByField(string $field, $value, $tableName = null)
+{
+    try {
+        $pdo = self::getConnection();
 
-            return $result;
-        } catch (PDOException $e) {
-            throw new Exception("Error fetching entity: " . $e->getMessage());
-        }
+        $tableName = $tableName ?? $this->getTableName();
+
+        $stmt = $pdo->prepare("SELECT * FROM {$tableName} WHERE $field = ?");
+        $stmt->execute([$value]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result;
+    } catch (PDOException $e) {
+        throw new Exception("Error fetching entity: " . $e->getMessage());
     }
+}
+
 
     // Authentication.php
 
